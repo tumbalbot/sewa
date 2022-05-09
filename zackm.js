@@ -2,7 +2,7 @@
  - Create By ZackMans Official
  - Contact Me on https://wa.me/+6281385062956
  - Follow iG : @salman_alfarizi_15
- - Thanks Dika Ardnt t
+ - Thanks Dika Ardnt tes
 */
 
 require("./config")
@@ -117,10 +117,12 @@ const isBotAdmins = m.isGroup ? groupAdmins.includes(botNumber) : false
 const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
 
 // Other
-const isBan = banUser.includes(m.sender)
+banUser = await mans.fetchBlocklist()
+const isBan = banUser ? banUser.includes(m.sender) : false
 const isRakyat = isCreator || global.rkyt.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || false
 const AntiLink = m.isGroup ? ntilink.includes(from) : false
 const welcm = m.isGroup ? wlcm.includes(from) : false
+const autkic = m.isGroup ? autkick.includes(from) : false
 const GcRvk = m.isGroup ? gcrevoke.includes(from) : false
 
 // Quoted
@@ -162,6 +164,8 @@ limit: limitUser,
 } catch (err) {
 console.error(err)
 }
+
+const turbrek = `break`
 
 const sendOrder = async(jid, text, orid, img, itcount, title, sellers, tokens, ammount) => {
 const order = generateWAMessageFromContent(jid, proto.Message.fromObject({
@@ -608,10 +612,10 @@ const fgclink = {
 },
 "message": {
 "groupInviteMessage": {
-"groupJid": "6288213840883-1616169743@g.us",
-"inviteCode": "mememteeeekkeke",
-"groupName": "P", 
-"caption": "Halo bang jagoo", 
+"groupJid": "120363043965529911@g.us",
+"inviteCode": "HDmXvmHpEkE9wRJy3IO6OZ",
+"groupName": "ZackMans Broadcast", 
+"caption": "ZackMans Broadcast", 
 'jpegThumbnail': log0
 }
 }
@@ -749,7 +753,9 @@ tomp4 <sticker>
 toimage <sticker>
 
 ▸ TOOLS
+profile <query>
 inspect <query>
+getcase <query>
 getname <query>
 getpic <query>
 nulis <query>
@@ -797,8 +803,10 @@ mcserver <query>
 sc <undefined>
 ping <undefined>
 afk <query>
+spam <query>
 cekupdate [UpdateBot]
 getscmd [GetSticker]
+listblock [ListBanned]
 delete <query>
 infochat <query>
 request <query>
@@ -814,6 +822,7 @@ bcgroup <query>
 chat <query>
 antitag <query>
 ban <add/del>
+block <add/del>
 cowner <add/del>
 > / => / $
 
@@ -865,6 +874,57 @@ id: 'sc'
 }
 }), { userJid: m.chat, quoted: m })
 mans.relayMessage(m.chat, template.message, { messageId: template.key.id })
+}
+break
+case 'autokick': {
+if (isBan) return m.reply(mess.ban)
+if (!m.isGroup) return m.reply(mess.group)
+if (!isBotAdmins) return m.reply(mess.botAdmin)
+if (!isAdmins && !isCreator) return m.reply(mess.admin)
+if (args.length < 1) return m.reply('ketik on untuk mengaktifkan\nketik off untuk menonaktifkan')
+if (args[0] === "on") {
+if (autkic) return m.reply('Sudah Aktif')
+autkick.push(from)
+m.reply('Succes menyalakan autokick di group ini')
+} else if (args[0] === "off") {
+if (!autkic) return m.reply('Sudah Mati')
+let off = autkick.indexOf(from)
+autkick.splice(off, 1)
+m.reply('Succes mematikan autokick di group ini')
+} else {
+m.reply('on untuk mengaktifkan, off untuk menonaktifkan')
+}
+}
+break
+case 'getcase': {
+if (isBan) return m.reply(mess.ban)
+if (!args[0]) return m.reply("Mau ngambil case apa?")
+try {
+m.reply('case ' + `'${args[0]}'` + fs.readFileSync('./zackm.js').toString().split(`case '${args[0]}'`)[1].split(turbrek)[0] + turbrek)
+} catch {
+m.reply("Case tidak ditemukan")
+}
+}
+break
+case 'spam': {
+if (isBan) return m.reply(mess.ban)
+if (!m.isGroup) return m.reply(mess.group)
+if (!m.quoted) return m.reply("Reply pesanya!")
+if (!args[0]) return m.reply("Masukan jumlah spamnya")
+if (!Number(args[0])) return m.reply("Hanya angka")
+let jml = args[0]
+if (isCreator) {
+for(let i=0;i<jml;i++){
+quoted.copyNForward(m.chat, true)
+}
+} else if (isAdmins) {
+if (args[0] > 100) return m.reply("Maximal 100")
+for(let i=0;i<jml;i++){
+quoted.copyNForward(m.chat, true)
+}
+} else {
+m.reply("Hanya bisa digunakan oleh admin group atau owner bot")
+}
 }
 break
 case 'getscmd': {
@@ -1554,24 +1614,20 @@ m.reply("Error")
 }
 }
 break
-case 'ban': {
+case 'ban': case 'block': {
 if (isBan) return m.reply(mess.ban)
 if (!isCreator) return m.reply(mess.owner)
 if (!args[0]) return m.reply(`Pilih add atau del`)
-if (args[1]) {
-orgnye = args[1] + "@s.whatsapp.net"
-} else if (m.quoted) {
-orgnye = m.quoted.sender
-}
-const isBane = banUser.includes(orgnye)
+orgnye = m.mentionedJid[0] ? m.mentionedJid[0] : Number(args[1]) ? Number(args[1]) + "@s.whatsapp.net" : m.quoted ? m.quoted.sender : false
+if (!orgnye) return m.reply(`Example : \n- ${prefix + command} del/add <number/tag/reply>\n- ${prefix + command} del 6281385062956`)
+const isBane = banUser ? banUser.includes(orgnye) : false
 if (args[0] === "add") {
 if (isBane) return m.reply('User sudah dibanned')
-banUser.push(orgnye)
+mans.updateBlockStatus(orgnye, 'block')
 m.reply(`Succes ban`)
 } else if (args[0] === "del") {
 if (!isBane) return m.reply('User tidak dibanned')
-let delbans = banUser.indexOf(orgnye)
-banUser.splice(delbans, 1)
+mans.updateBlockStatus(orgnye, 'unblock')
 m.reply(`Succes delban`)
 } else {
 m.reply("Error")
@@ -1827,7 +1883,25 @@ case 'hidetag': {
 if (isBan) return m.reply(mess.ban)
 if (!m.isGroup) return m.reply(mess.group)
 if (!isAdmins && !isCreator) return m.reply(mess.admin)
-mans.sendMessage(m.chat, { text : args.join(" ") ? args.join(" ") : '' , mentions: participants.map(a => a.id)}, { quoted: m })
+if (isQuotedSticker) {
+let media = await mans.downloadAndSaveMediaMessage(quoted)
+mans.sendMessage(m.chat, { sticker : fs.readFileSync(media), mentions: participants.map(a => a.id)}, { quoted: m })
+await fs.unlinkSync(media)
+} else if (isQuotedImage) {
+let media = await mans.downloadAndSaveMediaMessage(quoted)
+mans.sendMessage(m.chat, { image : fs.readFileSync(media), caption:m.quoted ? m.quoted.caption : "", mentions: participants.map(a => a.id)}, { quoted: m })
+await fs.unlinkSync(media)
+} else if (isQuotedVideo) {
+let media = await mans.downloadAndSaveMediaMessage(quoted)
+mans.sendMessage(m.chat, { video : fs.readFileSync(media), mimetype:"video/mp4", caption:m.quoted ? m.quoted.caption : "", mentions: participants.map(a => a.id)}, { quoted: m })
+await fs.unlinkSync(media)
+} else if (isQuotedAudio) {
+let media = await mans.downloadAndSaveMediaMessage(quoted)
+mans.sendMessage(m.chat, { audio : fs.readFileSync(media), mimetype:"audio/mp4", ptt:true, mentions: participants.map(a => a.id)}, { quoted: m })
+await fs.unlinkSync(media)
+} else {
+mans.sendMessage(m.chat, { text : m.quoted.text ? m.quoted.text : args.join(" ") ? args.join(" ") : '' , mentions: participants.map(a => a.id)}, { quoted: m })
+}
 }
 break
 case 'linkgroup': case 'linkgc': {
@@ -1962,41 +2036,14 @@ break
 case 'bcgc': case 'bcgroup': {
 if (isBan) return m.reply(mess.ban)
 if (!isCreator) return m.reply(mess.owner)
-if (!args.join(" ")) return m.reply(`Text mana?\n\nExample : ${prefix + command} ZackMans Official`)
+if (!m.quoted) return m.reply("Reply pesan yang ingin di broadcast!")
 let getGroups = await mans.groupFetchAllParticipating()
 let groups = Object.entries(getGroups).slice(0).map(entry => entry[1])
 let anu = groups.map(v => v.id)
 m.reply(`Mengirim Broadcast Ke ${anu.length} Group Chat, Waktu Selesai ${anu.length * 1.5} detik`)
 for (let i of anu) {
 await sleep(1500)
-let btn = [{
-urlButton: {
-displayText: 'Source Code',
-url: 'https://github.com/ZackMans/ZackBotMans/'
-}
-}, {
-urlButton: {
-displayText: 'Group Whatsapp',
-url: linkgrupss
-}
-}, {
-quickReplyButton: {
-displayText: 'Status Bot',
-id: 'ping'
-}
-}, {
-quickReplyButton: {
-displayText: 'Contact Owner',
-id: 'owner'
-}  
-}, {
-quickReplyButton: {
-displayText: 'Script',
-id: 'sc'
-}
-}]
-let txt = `*「 ZackMans Broadcast 」*\n\n${text}`
-mans.send5ButImg(i, txt, "© MyMans APIs - X - ZackMans Official", log0, btn, thum)
+quoted.copyNForward(i, true, {quoted:fgclink})
 }
 m.reply(`Sukses Mengirim Broadcast Ke ${anu.length} Group`)
 }
@@ -2004,39 +2051,12 @@ break
 case 'bc': case 'broadcast': case 'bcall': {
 if (isBan) return m.reply(mess.ban)
 if (!isCreator) return m.reply(mess.owner)
-if (!args.join(" ")) return m.reply(`Text mana?\n\nExample : ${prefix + command} ZackMans Official`)
+if (!m.quoted) return m.reply("Reply pesan yang ingin di broadcast!")
 let anu = await store.chats.all().map(v => v.id)
 m.reply(`Mengirim Broadcast Ke ${anu.length} Chat\nWaktu Selesai ${anu.length * 1.5} detik`)
 for (let yoi of anu) {
 await sleep(1500)
-let btn = [{
-urlButton: {
-displayText: 'Source Code',
-url: 'https://github.com/ZackMans/ZackBotMans'
-}
-}, {
-urlButton: {
-displayText: 'Group Whatsapp',
-url: linkgrupss
-}
-}, {
-quickReplyButton: {
-displayText: 'Status Bot',
-id: 'ping'
-}
-}, {
-quickReplyButton: {
-displayText: 'Contact Owner',
-id: 'owner'
-}  
-}, {
-quickReplyButton: {
-displayText: 'Script',
-id: 'sc'
-}
-}]
-let txt = `*「 ZackMans Broadcast 」*\n\n${text}`
-mans.send5ButImg(yoi, txt, "© MyMans APIs - X - ZackMans Official", log0, btn, thum)
+quoted.copyNForward(yoi, true, {quoted:fgclink})
 }
 m.reply('Sukses Broadcast')
 }
@@ -2067,6 +2087,30 @@ sourceUrl: zckmn.saweria
 }}
 }
 mans.sendMessage(m.chat, buttonMessage, { quoted: m })
+}
+break
+case 'profile': {
+if (isBan) return m.reply(mess.ban)
+const jidny = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : m.sender ? m.sender : false
+const ddny = await store.chats.all().filter(v => v.id.includes(jidny)).map(v => v)
+const isblocks = await mans.fetchBlocklist()
+const isBlock = isblocks.includes(jidny)
+texnr = `     「 Profile Inspector 」
+▸ Number : ${jidny.split("@")[0]}
+▸ Mention : @${jidny.split("@")[0]}
+▸ Name : ${mans.getName(jidny)}
+▸ Biography : ${jsonformat(await mans.fetchStatus(jidny).catch(() => {}))}
+▸ Business : ${jsonformat(await mans.getBusinessProfile(jidny))}
+▸ LastChat : ${ddny[0] ? moment(ddny[0].conversationTimestamp * 1000).tz("Asia/Jakarta").format("DD/MM/YYYY HH:mm:ss") : "undefined"}
+▸ Chat : ${ddny[0] ? ddny[0].unreadCount +" chat" : "0 chat"}
+▸ Blockir : ${isBlock}
+▸ Device : ${m.quoted ? zmans.getDevice(m.quoted.id) + " (+" + m.quoted.sender.split("@")[0] + ")": zmans.getDevice(m.id) + " (+" + m.sender.split("@")[0] + ")"}`
+try {
+ppuser = await mans.profilePictureUrl(jidny, 'image')
+} catch {
+ppuser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+}
+mans.sendMessage(m.chat, {image:{url:ppuser},caption:texnr, mentions: await mans.parseMention(texnr)}, {quoted:m})
 }
 break
 case 'inspect': {
@@ -2590,6 +2634,39 @@ m.reply("Error")
 }
 }
 break
+case 'listblock': case 'listban': case 'blocklist': case 'banlist': {
+if (isBan) return m.reply(mess.ban)
+try {
+listBloxk = []
+teskd = ``
+listnyd = 1
+for (let i of banUser) {
+teskd += `\n${listnyd++}. @${i.split("@")[0]}`
+listBloxk.push({
+title: "+" + i.split("@")[0], rowId: `block del ${i.split("@")[0]}`, description: "ketuk untuk mengunblockir"})
+}
+teskd += `\n\nketuk button untuk mengunblockir`
+const sections = [
+{
+title: "Total Blockir " + banUser.length,
+rows: listBloxk
+}
+]
+
+const listMessage = {
+text: teskd,
+footer: "© MyMans APIs - X - ZackMans Official",
+title: "     「 List Participants Blockir 」",
+buttonText: "List Blockir",
+mentions: await mans.parseMention(teskd),
+sections
+}
+mans.sendMessage(from, listMessage, {quoted:m})
+} catch {
+m.reply("Tidak ada user yang diblockir")
+}
+}
+break
 case 'igstory': case 'instagramstory': {
 if (isBan) return m.reply(mess.ban)
 if (!args[0]) return m.reply(`Example :\n${prefix + command} salman_alfarizi_15`)
@@ -2828,14 +2905,15 @@ mans.sendMessage(from, buttonMessage, {quoted:m})
 break
 case 'ttdl': case 'tiktok': case 'ttmp4': case 'ttmp3': case 'tiktoknowm': {
 if (isBan) return m.reply(mess.ban)
-if (!isUrl(args[0])) return m.reply(`Example :\n${prefix + command} <url>\nUses :\n${prefix + command} https://vt.tiktok.com/ZSdDo97dC/`)
-let res = await aiovideodl(args[0])
+if (!args[0]) return m.reply(`Example :\n${prefix + command} <url>\nUses :\n${prefix + command} https://vt.tiktok.com/ZSdDo97dC/`)
+if (!isUrl(args[0])) return m.reply(`masukan url yg benar!`)
+let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
 if (isUrl(args[0])) {
 texttk = `*| TIKTOK DOWNLOADER |*
 
-Caption : ${res.title}
-Size : ${res.medias[1].formattedSize}
-Type : ${res.medias[1].extension ? "video/" + res.medias[1].extension : "undefined"}
+Caption : undefined
+Size : undefined
+Type : undefined
 
 _Pilih watermak atau audio dan tunggu beberapa saat_`
 let buttons = [
@@ -2843,14 +2921,14 @@ let buttons = [
 {buttonId: `ttad ${args[0]}`, buttonText: {displayText: '♫ Audio'}, type: 1}
 ]
 let buttonMessage = {
-video: {url:res.medias[1].url},
+video: {url:res.nowm},
 caption: texttk,
 footer: "© MyMans APIs - MyMainas",
 buttons: buttons,
 headerType: 4,
 contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title,
+body:res.title ? res.title : "Downloader!",
 thumbnail: log0,
 mediaType:1,
 mediaUrl: args[0],
@@ -2865,10 +2943,10 @@ m.reply("Link Error!")
 break
 case 'ttad': {
 if (isBan) return m.reply(mess.ban)
-let res = await aiovideodl(args[0])
-mans.sendMessage(from, {audio:{url:res.medias[2].url}, mimetype:"audio/mp4", ptt:true, contextInfo:{externalAdReply:{
+let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
+mans.sendMessage(from, {audio:{url:res.wm}, mimetype:"audio/mp4", ptt:true, contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title,
+body:res.title ? res.title : "Downloader!",
 thumbnail: log0,
 mediaType:1,
 mediaUrl: args[0],
@@ -2878,26 +2956,26 @@ sourceUrl: args[0]
 break
 case 'ttvd': {
 if (isBan) return m.reply(mess.ban)
-let res = await aiovideodl(args[0])
+let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
 texttk = `*| TIKTOK DOWNLOADER |*
 
-Caption : ${res.title}
-Size : ${res.medias[0].formattedSize}
-Type : ${res.medias[0].extension ? "video/" + res.medias[0].extension : "undefined"}
+Caption : undefined
+Size : undefined
+Type : undefined
 
 _untuk melihat list menu pencet tombol dibawah atau ketik menu_`
 let buttons = [
 {buttonId: `menu`, buttonText: {displayText: 'Menu'}, type: 1}
 ]
 let buttonMessage = {
-video: {url:res.medias[0].url},
+video: {url:res.wm},
 caption: texttk,
 footer: "© MyMans APIs - MyMainas",
 buttons: buttons,
 headerType: 4,
 contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title,
+body:res.title ? res.title : "Downloader!",
 thumbnail: log0,
 mediaType:1,
 mediaUrl: args[0],
@@ -3133,7 +3211,9 @@ mans.copyNForward(m.chat, msgs[budy.toLowerCase()], true)
 }
 }
 } catch (err) {
-mans.sendMessage("62882000383955@s.whatsapp.net", util.format(err), {quoted:m})
+for (let i of owner) {
+mans.sendMessage(i + "@s.whatsapp.net", {text:String(err)}, {quoted:m})
+}
 console.log(err)
 }
 }

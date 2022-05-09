@@ -56,6 +56,11 @@ mans.ev.on('group-participants.update', async (anu) => {
             let metadata = await mans.groupMetadata(anu.id)
             let participants = anu.participants
             let behys = anu.participants.length
+            let botNumber = await mans.decodeJid(mans.user.id)
+            banUser = await mans.fetchBlocklist()
+            let isBan = banUser ? banUser.includes(participants) : false
+            let groupAdmins = m.isGroup ? await participants.filter(v => v.admin !== null).map(v => v.id) : ''
+            let isBotAdmins = m.isGroup ? groupAdmins.includes() : false
             for (let num of participants) {
                 // Get Profile Picture User
                 try {
@@ -71,7 +76,19 @@ mans.ev.on('group-participants.update', async (anu) => {
                     ppgroup = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
                 }
 if (anu.action == 'add') {
+                    if (isBan) {
+                    if (!autkick.includes(anu.id)) return
+                    if (!isBotAdmins) return
+                    mans.groupParticipantsUpdate(anu.id, [num], 'remove').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+                    tesgd = `*| AUTO KICK USER BLOCK |*
+
+Jika ingin mematikan fitur autokick user block ketik autokick off atau anda bisa mengklik tombol dibawah
+
+@${num.split("@")[0]} telah dikick karena dia telah dibanned oleh owner bot`
+                    mans.sendMessage(anu.id, {image:log0, caption: tesgd, mentions:[num]})
+                    }
                 	if (gcrevoke.includes(anu.id)) {
+                	if (!isBotAdmins) return
                 mbcs = `*| AUTO REVOKE LINK GROUP |*
 
 Jika ingin mematikan fitur auto revoke link group ketik autorevoke off atau anda bisa mengklik tombol dibawah
@@ -88,7 +105,7 @@ footer: "© MyMans APIs - X - ZackMans Official",
 buttons: buttons,
 headerType: 4,
 }
-mans.sendMessage(m.chat, buttonMessage)
+mans.sendMessage(anu.id, buttonMessage)
 await sleep(5000)
 mans.groupRevokeInvite(m.chat)
                     }
@@ -110,7 +127,7 @@ mans.groupRevokeInvite(m.chat)
 				year: 'numeric'
 				})
 				exec(`magick './media/image/wel.jpg' -gravity west -fill '#ffffff' -font './media/font/font-gue.ttf' -size 1280x710 -pointsize 75 -interline-spacing 7.5 -annotate +460-47 '${resa}' -pointsize 51 -annotate +460+83 '${jm} ${calender}' -pointsize 48 -annotate +100+230 'MEMBER + ${behys}' -pointsize 63 -annotate +460+200 'Welcome To ${metadata.subject}' '${ppuser}' -resize %[fx:t?u.w*0.2:u.w]x%[fx:?u.h*0.2:u.h] -gravity center -geometry -430+66 -composite './storage/hasil.jpg'`)
-				.on('error', () => mans.sendMessage(m.chat, {text:'error'}))
+				.on('error', () => mans.sendMessage(anu.id, {text:'error'}))
 				.on('exit', () => {
                 orgnye = num
                 mbc = `Welcome To ${metadata.subject}
@@ -129,7 +146,7 @@ mentions:[orgnye],
 buttons: buttons,
 headerType: 4,
 }
-mans.sendMessage(m.chat, buttonMessage)
+mans.sendMessage(anu.id, buttonMessage)
 })
                 } else if (anu.action == 'remove') {
                 	if (!wlcm.includes(anu.id)) return
