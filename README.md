@@ -23,7 +23,7 @@
 
 ## Config
 
-Isi semua yang dibutuhkan di file [`config.json`](https://github.com/ZackMans/ZackBotMans/blob/main/config.json)<br />
+Isi semua yang dibutuhkan di file [`config.js`](https://github.com/ZackMans/ZackBotMans/blob/main/config.js)<br />
 
 ## Request atau report bug
 
