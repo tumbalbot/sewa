@@ -67,7 +67,7 @@
   "yt-search": "^2.10.2"
  },
  "engines": {
-  "node": "v17.5.0",
+  "node": "v17.9.0",
   "npm": "8.5.0"
   },
  "directories": {
