@@ -2,7 +2,7 @@
  - Create By ZackMans Official
  - Contact Me on https://wa.me/+6281385062956
  - Follow iG : @salman_alfarizi_15
- - Thanks Dika Ardnt tes
+ - Thanks Dika Ardnt
 */
 
 require("./config")
@@ -20,17 +20,47 @@ const { JSDOM } = require('jsdom')
 const speed = require('performance-now')
 const hx = require("hxz-api")
 const yogipw = require("tod-api")
+const caliph = require("caliph-api")
+const xfarr = require("xfarr-api")
+const bochil = require("@bochilteam/scraper")
 const thiccysapi = require('textmaker-thiccy')
 const toHur = require('@develoka/angka-terbilang-js')
 const mathjs = require('mathjs')
+const fetch = require('node-fetch')
 const { performance } = require('perf_hooks')
 const { Primbon } = require('scrape-primbon')
 const { EmojiAPI } = require("emoji-api")
 const imgbbUploader = require('imgbb-uploader')
+const Database = require('./lib/database.js')
+const dbs = new Database()
 const primbon = new Primbon()
 const emoji = new EmojiAPI()
 const { smsg, formatp, tanggal, formatDate, getTime, isUrl, sleep, clockString, runtime, fetchJson, getBuffer, jsonformat, format, parseMention, getRandom } = require('./lib/myfunc')
-const { aiovideodl } = require('./lib/scraper.js')
+const { aiovideodl, styletext, mediafire, servermc } = require('./lib/scraper.js')
+const { UploadFileUgu, webp2mp4File, TelegraPh } = require('./lib/uploader')
+
+// Check Bandwidth
+let { sizeFormatter } = require("human-readable");
+let formatd = sizeFormatter({
+std: "JEDEC", // 'SI' (default) | 'IEC' | 'JEDEC'
+decimalPlaces: 2,
+keepTrailingZeroes: false,
+render: (literal, symbol) => `${literal} ${symbol}B`,
+});
+async function checkBandwidth() {
+var data = require("node-os-utils")
+data = await data.netstat.stats()
+let ind = 0
+let out = 0
+for (let i of data) {
+ind = ind + i.inputBytes
+out = out + i.outputBytes
+}
+return {
+download: formatd(ind),
+upload: formatd(out)
+}
+}
 
 // Read Database
 global.db = JSON.parse(fs.readFileSync('./src/database.json'))
@@ -121,28 +151,48 @@ banUser = await mans.fetchBlocklist()
 const isBan = banUser ? banUser.includes(m.sender) : false
 const isRakyat = isCreator || global.rkyt.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || false
 const AntiLink = m.isGroup ? ntilink.includes(from) : false
+const AntiDelete = m.isGroup ? ntidel.includes(from) : false
+const AntiHidetag = m.isGroup ? ntihide.includes(from) : false
 const welcm = m.isGroup ? wlcm.includes(from) : false
 const autkic = m.isGroup ? autkick.includes(from) : false
 const GcRvk = m.isGroup ? gcrevoke.includes(from) : false
 
 // Quoted
 const content = JSON.stringify(m.message)
-        const isMedias = (m.mtype === 'imageMessage' || m.mtype === 'videoMessage')
-		const isQuotedImage = m.mtype === 'extendedTextMessage' && content.includes('imageMessage')
-		const isQuotedVideo = m.mtype === 'extendedTextMessage' && content.includes('videoMessage')
-		const isQuotedAudio = m.mtype === 'extendedTextMessage' && content.includes('audioMessage')
-		const isQuotedSticker = m.mtype === 'extendedTextMessage' && content.includes('stickerMessage')
-		const isQuotedLoca = m.mtype === 'extendedTextMessage' && content.includes('locationMessage')
-        const isQuotedContact = m.mtype === 'extendedTextMessage' && content.includes('contactMessage')
-        const isQuotedDocs = m.mtype === 'extendedTextMessage' && content.includes('documentMessage')
-        const isQuotedTeks = m.mtype === 'extendedTextMessage' && content.includes('quotedMessage')
-        const isQuotedTag = m.mtype === 'extendedTextMessage' && content.includes('mentionedJid')
-        const isQuotedProd = m.mtype === 'extendedTextMessage' && content.includes('productMessage')
-        const isQuotedReply = m.mtype === 'extendedTextMessage' && content.includes('Message')
+const isMedias = (m.mtype === 'imageMessage' || m.mtype === 'videoMessage')
+const isQuotedImage = m.mtype === 'extendedTextMessage' && content.includes('imageMessage')
+const isQuotedVideo = m.mtype === 'extendedTextMessage' && content.includes('videoMessage')
+const isQuotedAudio = m.mtype === 'extendedTextMessage' && content.includes('audioMessage')
+const isQuotedSticker = m.mtype === 'extendedTextMessage' && content.includes('stickerMessage')
+const isQuotedLoca = m.mtype === 'extendedTextMessage' && content.includes('locationMessage')
+const isQuotedContact = m.mtype === 'extendedTextMessage' && content.includes('contactMessage')
+const isQuotedDocs = m.mtype === 'extendedTextMessage' && content.includes('documentMessage')
+const isQuotedTeks = m.mtype === 'extendedTextMessage' && content.includes('quotedMessage')
+const isQuotedTag = m.mtype === 'extendedTextMessage' && content.includes('mentionedJid')
+const isQuotedProd = m.mtype === 'extendedTextMessage' && content.includes('productMessage')
+const isQuotedReply = m.mtype === 'extendedTextMessage' && content.includes('Message')
+
+// Anti Delete
+if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == 0) {
+if (!AntiDelete) return
+let key = m.message.protocolMessage.key
+let msg = await mans.serializeM(await store.loadMessage(key.remoteJid, key.id))
+let teks = `   「 Anti Delete Message 」
+▸ User : @${msg.sender.split("@")[0]}
+▸ Date : ${moment(msg.messageTimestamp * 1000).tz("Asia/Jakarta").format("DD/MM/YYYY HH:mm:ss")} WIB
+▸ Type : ${msg.mtype}
+            `
+mans.sendText(m.chat, teks, msg, { mentions: [msg.sender] })
+await mans.relayMessage(m.chat, msg.message, { messageId: msg.id })
+}
 
 if (m.message) {
 console.log(chalk.black(chalk.bgWhite('[ PESAN ]')), chalk.black(chalk.bgGreen(new Date)), chalk.black(chalk.bgBlue(budy || m.mtype)) + '\n' + chalk.magenta('=> Dari'), chalk.green(pushname), chalk.yellow(m.sender) + '\n' + chalk.blueBright('=> Di'), chalk.green(m.isGroup ? pushname : 'Private Chat', m.chat))
+if (autred === true) {
+mans.sendReadReceipt(m.chat, m.sender, [m.key.id])
 }
+}
+
 if (command) {
 await mans.sendPresenceUpdate('composing', m.chat)
 }
@@ -167,6 +217,7 @@ console.error(err)
 
 const turbrek = `break`
 
+// Send Order
 const sendOrder = async(jid, text, orid, img, itcount, title, sellers, tokens, ammount) => {
 const order = generateWAMessageFromContent(jid, proto.Message.fromObject({
  "orderMessage": {
@@ -220,6 +271,16 @@ user.afkReason = ''
 if (m.mtype === 'groupInviteMessage') {
 teks = `Ketik join untuk bergabung ke group whatsapp anda`
 sendOrder(m.chat, teks, "391028153034238", fs.readFileSync('./media/image/mans.jpg'), 2022, "ZackMans Official ~ Multi Device", "6283155687629@s.whatsapp.net", "AR7zJt8MasFx2Uir/fdxhkhPGDbswfWrAr2gmoyqNZ/0Wg==", "99999999999999999999")
+}
+
+// Anti Hidetag X-Zons
+if (AntiHidetag) {
+if (m.mentionedJid.length === participants.length) {
+if (!m.isGroup) return // Mendetect Groupnyee
+if (!isBotAdmins) return // Mendetect Botnyee
+m.reply("Jangan maenin hidetag babi!")
+await mans.groupParticipantsUpdate(m.chat, [m.sender], 'remove').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+}
 }
 
 // AntiLink
@@ -669,211 +730,785 @@ message: {
 } 
 }
 
-// Jangan diapa apain om
-const zckmn = await fetchJson("https://ZackMans.github.io/database/zackbotmans.json")
-const ceknyai = "101"
-if (zckmn.update === ceknyai) {
-cekbotinfo = "Anda menggunakan zackbotmans versi terbaru, belum ada update dari owner"
-} else {
-cekbotinfo = "Anda menggunakan zackbotmans versi lama, owner telah mengupdate zackbotmans ketik cekupdate untuk melihat versi terbaru"
+// Reply
+async function reply(teks) {
+const relink = ['https://youtu.be/GBe1jHscqAY','https://chat.whatsapp.com/HDmXvmHpEkE9wRJy3IO6OZ']
+const rurl = relink[Math.floor(Math.random() * relink.length)];
+mamans = teks
+mans.sendMessage(m.chat, {text:mamans, mentions: await mans.parseMention(mamans), contextInfo:{externalAdReply:{
+title: `${ucapanWaktu} ${pushname}`,
+body: "© MyMans APIs - X - ZackMans Official",
+thumbnail: thum,
+mediaType:1,
+mediaUrl: rurl,
+sourceUrl: rurl
+}}}, {quoted:m})
 }
 
-// Terserah anda
+// Jangan diapa apain om
+const zckmn = await fetchJson("https://ZackMans.github.io/database/zackbotmans.json")
+const ceknyai = require('./package.json').version
+if (zckmn.update === ceknyai) {
+cekbotinfo = `Anda menggunakan zackbotmans versi terbaru (${ceknyai}), belum ada update dari owner`
+} else {
+cekbotinfo = `Anda menggunakan zackbotmans v${ceknyai}, owner telah mengupdate zackbotmans ke v${zckmn.update}, ketik cekupdate untuk melihat versi terbaru`
+}
+
+let getjson = await mans.query({
+tag: "iq",
+attrs: {
+type: "get",
+xmlns: "w:g2",
+to: "@g.us"
+},
+content: [{ tag: "invite", attrs: { code: "KEDT4a47m1Q0A5yATttez0" } }]
+})
+let thnsto = getjson.content[0].content[0].content[0].content ? getjson.content[0].content[0].content[0].content.toString() : 'undefined'
+let cBandwidth = await checkBandwidth()
+let prefs = ` ▸ ${prefix}`
 const listmn = `*ROBOT WHATSAPP MULTI DEVICE*
 _Script By MyMans APIs - X - ZackMans Official_
 
-Library : Baileys - Multi Device
-InfoBot : ${cekbotinfo}
+${cekbotinfo}
 
-PROFILE BOT :
--> Owner : ${owner.length}
--> Rakyat : ${rkyt.length}
+STATISTICS BOT
+ •> Library : Baileys - Multi Device
+ •> Upload : ${cBandwidth.upload}
+ •> Download : ${cBandwidth.download}
+ •> Runtime : ${runtime(process.uptime())}
 
-PROFILE GROUP :
--> Antilink : ${AntiLink? "on" : "off"}
--> Autorevoke : ${GcRvk? "on" : "off"}
--> Welcome : ${welcm? "on" : "off"}
+TOTAL USER ROBOT
+ -> Owner : ${owner.length}
+ -> Rakyat : ${rkyt.length}
 
-▸ GROUP CHAT
-linkgroup <undefined>
-setppgc <image>
-setname <query>
-setdesc <query>
-ephemeral <query>
-hidetag <query>
-tagall <query>
-promote <query>
-demote <query>
-vote <query>
-devote <undefined>
-upvote <undefined>
-cekvote <undefined>
-hapusvote <undefined>
-antilink <on/off>
-welcome <on/off>
-autorevoke <on/off>
-add <query>
-kick <query>
-revoke <undefined>
-group <open/close>
-editinfo <open/close>
+INFO ROBOT
+ -> Autoread : ${autred ? "on" : "off"}
+ -> Antitags : ${antitags ? "on" : "off"}
+ -> Anticall : ${anticals ? "on" : "off"}
 
-▸ DOWNLOADER
-instagram <query>
-tiktok <query>
-twitter <query>
-facebook <query>
-youtube <query>
-igstory <query>
-jpeg <query>
-mp4 <query>
+INFO GROUP
+ -> Antilink : ${AntiLink? "on" : "off"}
+ -> Antihidetag : ${AntiHidetag? "on" : "off"}
+ -> Autokick : ${autkic? "on" : "off"}
+ -> Autorevoke : ${GcRvk? "on" : "off"}
+ -> Welcome : ${welcm? "on" : "off"}
+ -> Antidelete : ${AntiDelete? "on" : "off"}
 
-▸ SEARCH
-gimage <query>
-ytsearch <query>
-searchgc <query>
-play <query>
-happymod <query>
-servermc <undefined>
-mcpedl <query>
-google <query>
-pinterest <query>
+GROUP MENU
+${prefs}linkgroup <undefined>
+${prefs}setppgc <image>
+${prefs}setname <query>
+${prefs}setdesc <query>
+${prefs}ephemeral <query>
+${prefs}hidetag <query>
+${prefs}tagall <query>
+${prefs}promote <query>
+${prefs}demote <query>
+${prefs}vote <query>
+${prefs}devote <undefined>
+${prefs}upvote <undefined>
+${prefs}cekvote <undefined>
+${prefs}hapusvote <undefined>
+${prefs}antidelete <on/off>
+${prefs}antilink <on/off>
+${prefs}antihidetag <on/off>
+${prefs}autokick <on/off>
+${prefs}welcome <on/off>
+${prefs}autorevoke <on/off>
+${prefs}setwelcome <query>
+${prefs}add <query>
+${prefs}kick <query>
+${prefs}revoke <undefined>
+${prefs}group <open/close>
+${prefs}editinfo <open/close>
 
-▸ CONVERT
-sticker <image/video>
-smeme <image>
-stickerwm <reply>
-emoji <query>
-tomp3 <video>
-tovn <video>
-toaudio <video>
-togif <video>
-tourl <query>
-tomp4 <sticker>
-toimage <sticker>
+DOWNLOADER
+${prefs}instagram <query>
+${prefs}tiktok <query>
+${prefs}twitter <query>
+${prefs}facebook <query>
+${prefs}youtube <query>
+${prefs}igstory <query>
+${prefs}mediafire <query>
+${prefs}gitclone <query>
+${prefs}jpeg <query>
+${prefs}mp4 <query>
 
-▸ TOOLS
-profile <query>
-inspect <query>
-getcase <query>
-getname <query>
-getpic <query>
-nulis <query>
-kalkulator <query>
-quoted <query>
-join <query>
-fliptext <query>
-tohuruf <query>
-volume <quer>
-bass <query>
-tempo <query>
-translate <query>
+SEARCH MENU
+${prefs}gimage <query>
+${prefs}ytsearch <query>
+${prefs}searchgc <query>
+${prefs}play <query>
+${prefs}happymod <query>
+${prefs}servermc <undefined>
+${prefs}mcpedl <query>
+${prefs}google <query>
+${prefs}pinterest <query>
 
-▸ HAPPY MENU
-halah <query>
-hilih <query>
-huluh <query>
-heleh <query>
-holoh <query>
-math <query>
-tictactoe <query>
-delttt <query>
-tebak <query>
-family100 <undefined>
-suitpvp <query>
+CONVERT MENU
+${prefs}sticker <image/video>
+${prefs}smeme <image>
+${prefs}stickerwm <reply>
+${prefs}styletext <query>
+${prefs}removebg <query>
+${prefs}ttp <query>
+${prefs}attp <query>
+${prefs}emojimix <query>
+${prefs}emojimix2 <query>
+${prefs}tomp3 <video>
+${prefs}tovn <video>
+${prefs}toaudio <video>
+${prefs}togif <video>
+${prefs}tourl <query>
+${prefs}tomp4 <sticker>
+${prefs}toimage <sticker>
 
-▸ MAKER MENU
-textmaker <option>
+TOOLS MENU
+${prefs}profile <query>
+${prefs}inspect <query>
+${prefs}getcase <query>
+${prefs}getname <query>
+${prefs}getpic <query>
+${prefs}nulis <query>
+${prefs}kalkulator <query>
+${prefs}get <query>
+${prefs}quoted <query>
+${prefs}join <query>
+${prefs}fliptext <query>
+${prefs}tohuruf <query>
+${prefs}volume <quer>
+${prefs}bass <query>
+${prefs}tempo <query>
+${prefs}translate <query>
 
-▸ DATABASE
-setcmd <query>
-listcmd <undefined>
-delcmd <query>
-lockcmd <query>
-addmsg <query>
-listmsg <undefined>
-getmsg <query>
-delmsg <query>
+PRIMBON MENU
+${prefs}nomorhoki <query>
+${prefs}artimimpi <query>
+${prefs}artinama <query>
+${prefs}ramaljodoh <query>
+${prefs}ramaljodohbali <query>
+${prefs}suamiistri <query>
+${prefs}ramalcinta <query>
+${prefs}cocoknama <query>
+${prefs}pasangan <query>
+${prefs}jadiannikah <query>
+${prefs}sifatusaha <query>
+${prefs}rezeki <query>
+${prefs}pekerjaan <query>
+${prefs}nasib <query>
+${prefs}penyakit <query>
+${prefs}tarot <query>
+${prefs}fengshui <query>
+${prefs}haribaik <query>
+${prefs}harisangar <query>
+${prefs}harisial <query>
+${prefs}nagahari <query>
+${prefs}arahrezeki <query>
+${prefs}peruntungan <query>
+${prefs}weton <query>
+${prefs}karakter <query>
+${prefs}keberuntungan <query>
+${prefs}memancing <query>
+${prefs}masasubur <query>
+${prefs}zodiak <query>
+${prefs}shio <query>
 
-▸ OTHER
-owner <undefined>
-listpc <undefined>
-listgc <undefined>
-mcserver <query>
-sc <undefined>
-ping <undefined>
-afk <query>
-spam <query>
-cekupdate [UpdateBot]
-getscmd [GetSticker]
-listblock [ListBanned]
-delete <query>
-infochat <query>
-request <query>
-report <query>
-donate <undefined>
-listonline <undefined>
+HAPPY MENU
+${prefs}halah <query>
+${prefs}hilih <query>
+${prefs}huluh <query>
+${prefs}heleh <query>
+${prefs}holoh <query>
+${prefs}math <query>
+${prefs}tictactoe <query>
+${prefs}delttt <query>
+${prefs}tebak <query>
+${prefs}family100 <undefined>
+${prefs}suitpvp <query>
 
-▸ OWNER
-self <undefined>
-public <undefined>
-bcall <query>
-bcgroup <query>
-chat <query>
-antitag <query>
-ban <add/del>
-block <add/del>
-cowner <add/del>
-> / => / $
+MAKER MENU
+${prefs}textmaker <option>
+
+DATABASE
+${prefs}setcmd <query>
+${prefs}listcmd <undefined>
+${prefs}delcmd <query>
+${prefs}lockcmd <query>
+${prefs}addmsg <query>
+${prefs}listmsg <undefined>
+${prefs}getmsg <query>
+${prefs}delmsg <query>
+
+OTHER
+${prefs}owner <undefined>
+${prefs}listpc <undefined>
+${prefs}listgc <undefined>
+${prefs}mcserver <query>
+${prefs}sc <undefined>
+${prefs}ping <undefined>
+${prefs}thanksto <query>
+${prefs}afk <query>
+${prefs}spam <query>
+${prefs}cekupdate [UpdateBot]
+${prefs}getscmd [GetSticker]
+${prefs}listblock [ListBanned]
+${prefs}delete <query>
+${prefs}infochat <query>
+${prefs}request <query>
+${prefs}report <query>
+${prefs}donate <undefined>
+${prefs}listonline <undefined>
+
+OWNER MENU
+${prefs}self <undefined>
+${prefs}public <undefined>
+${prefs}bcall <query>
+${prefs}bcgroup <query>
+${prefs}chat <query>
+${prefs}anticall <query>
+${prefs}antitag <query>
+${prefs}autoread <query>
+${prefs}ban <add/del>
+${prefs}block <add/del>
+${prefs}cowner <add/del>
+> / => / $ / <
 
 THANKS TO :
-adiwajshing, MhankBarBar, Nurutomo, MyMans APIs - X - ZackMans Official, Dika Ardnt, Hexagonz, Ariffb, BochilGaming, Heroku, Replit, Railway, Termux, Rest APIs, Penyedia Module, Mastah Lainya
+adiwajshing, MhankBarBar, Nurutomo, MyMans APIs - X - ZackMans Official, ${thnsto}, Heroku, Replit, Railway, Termux, Rest APIs, Penyedia Module, Mastah Lainya
 
 ${ucapanWaktu}
 ${jangwak}`
 const qtod = m.quoted? "true":"false"
 
 // Case Nye Sini Ngab
+if (!m.isBaileys) { // Anti Respon BotBaileys
 switch(command) {
 case 'menu': case 'help': {
 if (isBan) return m.reply(mess.ban)
-let message = await prepareWAMessageMedia({ video: fs.readFileSync('./media/video/mans.mp4'), gifPlayback:true, jpegThumbnail:global.log0 }, { upload: mans.waUploadToServer })
-const template = generateWAMessageFromContent(m.chat, proto.Message.fromObject({
-templateMessage: {
-hydratedTemplate: {
-videoMessage: message.videoMessage,
-hydratedContentText: listmn,
-hydratedFooterText: "© MyMans APIs - X - ZackMans Official",
-hydratedButtons: [{
-urlButton: {
-displayText: 'Group Whatsapp',
-url: linkgrupss
+const templateButtons = [
+{index: 1, urlButton: {displayText: 'Group Whatsapp', url: linkgrupss}}
+]
+const templateMessage = {
+video:fs.readFileSync("./media/video/mans.mp4"),
+gifPlayback:true,
+jpegThumbnail:log0,
+caption: listmn,
+footer: '© MyMans APIs - X - ZackMans Official',
+templateButtons: templateButtons
 }
-}, {
-urlButton: {
-displayText: 'Instagram',
-url: 'https://instagram.com/salman_alfarizi_15'
+mans.sendMessage(m.chat, templateMessage)
 }
-}, {
-quickReplyButton: {
-displayText: 'Status Bot',
-id: 'ping'
+break
+case 'imagenobg': case 'removebg': case 'remove-bg': {
+if (isBan) return m.reply(mess.ban)
+if (!quoted) return m.reply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
+if (!/image/.test(mime)) return m.reply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
+if (/webp/.test(mime)) return m.reply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
+let remobg = require('remove.bg')
+let apirnobg = ['q61faXzzR5zNU6cvcrwtUkRU','S258diZhcuFJooAtHTaPEn4T','5LjfCVAp4vVNYiTjq9mXJWHF','aT7ibfUsGSwFyjaPZ9eoJc61','BY63t7Vx2tS68YZFY6AJ4HHF','5Gdq1sSWSeyZzPMHqz7ENfi8','86h6d6u4AXrst4BVMD9dzdGZ','xp8pSDavAgfE5XScqXo9UKHF','dWbCoCb3TacCP93imNEcPxcL']
+let apinobg = apirnobg[Math.floor(Math.random() * apirnobg.length)]
+hmm = await './src/remobg-'+getRandom('')
+localFile = await mans.downloadAndSaveMediaMessage(quoted, hmm)
+outputFile = await './src/hremo-'+getRandom('.png')
+reply(mess.wait)
+remobg.removeBackgroundFromImageFile({
+path: localFile,
+apiKey: apinobg,
+size: "regular",
+type: "auto",
+scale: "100%",
+outputFile 
+}).then(async result => {
+mans.sendMessage(m.chat, {image: fs.readFileSync(outputFile), caption: mess.success}, { quoted : m })
+await fs.unlinkSync(localFile)
+await fs.unlinkSync(outputFile)
+})
 }
-}, {
-quickReplyButton: {
-displayText: 'Contact Owner',
-id: 'owner'
-}  
-}, {
-quickReplyButton: {
-displayText: 'Script',
-id: 'sc'
+break
+case 'antidelete': {
+if (isBan) return m.reply(mess.ban)
+if (!m.isGroup) return m.reply(mess.group)
+if (!isBotAdmins) return m.reply(mess.botAdmin)
+if (!isAdmins && !isCreator) return m.reply(mess.admin)
+if (args.length < 1) return m.reply('ketik on untuk mengaktifkan\nketik off untuk menonaktifkan')
+if (args[0] === "on") {
+if (AntiDelete) return m.reply('Sudah Aktif')
+ntidel.push(from)
+m.reply('Succes menyalakan antidelete di group ini')
+} else if (args[0] === "off") {
+if (!AntiDelete) return m.reply('Sudah Mati')
+let off = ntidel.indexOf(from)
+ntidel.splice(off, 1)
+m.reply('Succes mematikan antidelete di group ini')
+} else {
+m.reply('on untuk mengaktifkan, off untuk menonaktifkan')
 }
-}]
+}
+break
+case 'gitclone':
+if (isBan) return m.reply(mess.ban)
+let regx = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i
+if (!args[0]) return m.reply('Linknya?')
+if (!regx.test(args[0])) return m.reply('Linknya salah')
+let [, user, repo] = args[0].match(regx) || []
+repos = repo.replace(/.git$/, '')
+let hasdl = `https://api.github.com/repos/${user}/${repos}/zipball`
+let namafile = (await fetch(hasdl, {method: 'HEAD'})).headers.get('content-disposition').match(/attachment; filename=(.*)/)[1]
+mans.sendFile(m.chat, hasdl, namafile, m)
+break
+case 'get': {
+if (isBan) return m.reply(mess.ban)
+if (!args[0]) return m.reply("Urlnya?")
+if (!isUrl(text)) return m.reply("Hanya Link!")
+try {
+let gts = await fetchJson(args.join(" "))
+m.reply(gts)
+} catch {
+m.reply("Error!")
 }
 }
-}), { userJid: m.chat, quoted: m })
-mans.relayMessage(m.chat, template.message, { messageId: template.key.id })
+break
+case 'setwelcome': {
+if (isBan) return m.reply(mess.ban)
+if (!m.isGroup) return m.reply(mess.group)
+if (!isBotAdmins) return m.reply(mess.botAdmin)
+if (!isAdmins && !isCreator) return m.reply(mess.admin)
+const arge = text.trim().split(/ +/).slice(1)
+const wjoin = wjoind.find(i => m.isGroup ? i.jid.includes(m.chat) : false)
+const wleave = wleaved.find(i => m.isGroup ? i.jid.includes(m.chat) : false)
+if (!args[0]) return m.reply(`Example : @user, @subject\n- ${prefix + command} join <teks>\n- ${prefix + command} leave <teks>\n- ${prefix + command} default`)
+try {
+if (args[0] === "join") {
+if (!arge[0]) return m.reply("Teksnya mana kak?")
+if (wjoin) {
+var  has = wjoind.find(i => i.jid == m.chat)
+var chn = wjoind.indexOf(has)
+wjoind[chn].message = arge.join(" ")
+m.reply(`Succes change to ${arge.join(" ")}`)
+} else {
+wjoind.push({ jid: m.chat, message: arge.join(" ") })
+m.reply(`Succes set to ${arge.join(" ")}`)
+}
+} else if (args[0] === "leave") {
+if (!arge[0]) return m.reply("Teksnya mana kak?")
+if (wleave) {
+var  has = wleaved.find(i => i.jid == m.chat)
+var chn = wleaved.indexOf(has)
+wleaved[chn].message = arge.join(" ")
+m.reply(`Succes change to ${arge.join(" ")}`)
+} else {
+wleaved.push({ jid: m.chat, message: arge.join(" ") })
+m.reply(`Succes set to ${arge.join(" ")}`)
+}
+} else if (args[0] === "default") {
+if (wjoin) {
+var hasj = wjoind.find( i => i.jid == m.chat )
+var posj = wjoind.indexOf(hasj)
+wjoind.splice(posj, 1)
+}
+if (wleave) {
+var hasl = wleaved.find( i => i.jid == m.chat )
+var posl = wleaved.indexOf(hasl)
+wleaved.splice(posl, 1)
+}
+m.reply("Succes to default")
+break
+}
+} catch (err) {
+m.reply(String(err))
+}
+}
+break
+case 'nomerhoki': case 'nomorhoki': {
+if (isBan) return m.reply(mess.ban)
+if (!Number(text)) return m.reply(`Example : ${prefix + command} 6281385062956`)
+let anu = await primbon.nomer_hoki(Number(text))
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nomor HP :* ${anu.message.nomer_hp}\n▸ *Angka Shuzi :* ${anu.message.angka_shuzi}\n▸ *Energi Positif :*\n- Kekayaan : ${anu.message.energi_positif.kekayaan}\n- Kesehatan : ${anu.message.energi_positif.kesehatan}\n- Cinta : ${anu.message.energi_positif.cinta}\n- Kestabilan : ${anu.message.energi_positif.kestabilan}\n- Persentase : ${anu.message.energi_positif.persentase}\n▸ *Energi Negatif :*\n- Perselisihan : ${anu.message.energi_negatif.perselisihan}\n- Kehilangan : ${anu.message.energi_negatif.kehilangan}\n- Malapetaka : ${anu.message.energi_negatif.malapetaka}\n- Kehancuran : ${anu.message.energi_negatif.kehancuran}\n- Persentase : ${anu.message.energi_negatif.persentase}`, m)
+}
+break
+case 'artimimpi': case 'tafsirmimpi': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} belanja`)
+let anu = await primbon.tafsir_mimpi(text)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Mimpi :* ${anu.message.mimpi}\n▸ *Arti :* ${anu.message.arti}\n▸ *Solusi :* ${anu.message.solusi}`, m)
+}
+break
+case 'ramalanjodoh': case 'ramaljodoh': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015, Aina, 16, 3, 2015`)
+let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+let anu = await primbon.ramalan_jodoh(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama Anda :* ${anu.message.nama_anda.nama}\n▸ *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n▸ *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n▸ *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'ramalanjodohbali': case 'ramaljodohbali': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015, Aina, 16, 3, 2015`)
+let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+let anu = await primbon.ramalan_jodoh_bali(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama Anda :* ${anu.message.nama_anda.nama}\n▸ *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n▸ *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n▸ *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'suamiistri': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015, Aina, 16, 3, 2015`)
+let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+let anu = await primbon.suami_istri(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama Suami :* ${anu.message.suami.nama}\n▸ *Lahir Suami :* ${anu.message.suami.tgl_lahir}\n▸ *Nama Istri :* ${anu.message.istri.nama}\n▸ *Lahir Istri :* ${anu.message.istri.tgl_lahir}\n▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'ramalancinta': case 'ramalcinta': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015, Aina, 16, 3, 2015`)
+let [nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2] = text.split`,`
+let anu = await primbon.ramalan_cinta(nama1, tgl1, bln1, thn1, nama2, tgl2, bln2, thn2)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama Anda :* ${anu.message.nama_anda.nama}\n▸ *Lahir Anda :* ${anu.message.nama_anda.tgl_lahir}\n▸ *Nama Pasangan :* ${anu.message.nama_pasangan.nama}\n▸ *Lahir Pasangan :* ${anu.message.nama_pasangan.tgl_lahir}\n▸ *Sisi Positif :* ${anu.message.sisi_positif}\n▸ *Sisi Negatif :* ${anu.message.sisi_negatif}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'artinama': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman`)
+let anu = await primbon.arti_nama(text)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Arti :* ${anu.message.arti}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'kecocokannama': case 'cocoknama': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015`)
+let [nama, tgl, bln, thn] = text.split`,`
+let anu = await primbon.kecocokan_nama(nama, tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Life Path :* ${anu.message.life_path}\n▸ *Destiny :* ${anu.message.destiny}\n▸ *Destiny Desire :* ${anu.message.destiny_desire}\n▸ *Personality :* ${anu.message.personality}\n▸ *Persentase :* ${anu.message.persentase_kecocokan}`, m)
+}
+break
+case 'kecocokanpasangan': case 'cocokpasangan': case 'pasangan': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman|Aina`)
+let [nama1, nama2] = text.split`|`
+let anu = await primbon.kecocokan_nama_pasangan(nama1, nama2)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendImage(m.chat,  anu.message.gambar, `▸ *Nama Anda :* ${anu.message.nama_anda}\n▸ *Nama Pasangan :* ${anu.message.nama_pasangan}\n▸ *Sisi Positif :* ${anu.message.sisi_positif}\n▸ *Sisi Negatif :* ${anu.message.sisi_negatif}`, m)
+}
+break
+case 'jadianpernikahan': case 'jadiannikah': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 6, 12, 2020`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.tanggal_jadian_pernikahan(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Tanggal Pernikahan :* ${anu.message.tanggal}\n▸ *karakteristik :* ${anu.message.karakteristik}`, m)
+}
+break
+case 'sifatusaha': {
+if (isBan) return m.reply(mess.ban)
+if (!text)return m.reply(`Example : ${prefix+ command} 28, 12, 2021`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.sifat_usaha_bisnis(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Lahir :* ${anu.message.hari_lahir}\n▸ *Usaha :* ${anu.message.usaha}`, m)
+}
+break
+case 'rejeki': case 'rezeki': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.rejeki_hoki_weton(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Lahir :* ${anu.message.hari_lahir}\n▸ *Rezeki :* ${anu.message.rejeki}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'pekerjaan': case 'kerja': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.pekerjaan_weton_lahir(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Lahir :* ${anu.message.hari_lahir}\n▸ *Pekerjaan :* ${anu.message.pekerjaan}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'ramalannasib': case 'ramalnasib': case 'nasib': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.ramalan_nasib(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Analisa :* ${anu.message.analisa}\n▸ *Angka Akar :* ${anu.message.angka_akar}\n▸ *Sifat :* ${anu.message.sifat}\n▸ *Elemen :* ${anu.message.elemen}\n▸ *Angka Keberuntungan :* ${anu.message.angka_keberuntungan}`, m)
+}
+break
+case 'potensipenyakit': case 'penyakit': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.cek_potensi_penyakit(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Analisa :* ${anu.message.analisa}\n▸ *Sektor :* ${anu.message.sektor}\n▸ *Elemen :* ${anu.message.elemen}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'artitarot': case 'tarot': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.arti_kartu_tarot(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendImage(m.chat, anu.message.image, `▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Simbol Tarot :* ${anu.message.simbol_tarot}\n▸ *Arti :* ${anu.message.arti}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'fengshui': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 1, 2005\n\nNote : ${prefix + command} Nama, gender, tahun lahir\nGender : 1 untuk laki-laki & 2 untuk perempuan`)
+let [nama, gender, tahun] = text.split`,`
+let anu = await primbon.perhitungan_feng_shui(nama, gender, tahun)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Lahir :* ${anu.message.tahun_lahir}\n▸ *Gender :* ${anu.message.jenis_kelamin}\n▸ *Angka Kua :* ${anu.message.angka_kua}\n▸ *Kelompok :* ${anu.message.kelompok}\n▸ *Karakter :* ${anu.message.karakter}\n▸ *Sektor Baik :* ${anu.message.sektor_baik}\n▸ *Sektor Buruk :* ${anu.message.sektor_buruk}`, m)
+}
+break
+case 'haribaik': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.petung_hari_baik(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Kala Tinantang :* ${anu.message.kala_tinantang}\n▸ *Info :* ${anu.message.info}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'harisangar': case 'taliwangke': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.hari_sangar_taliwangke(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Hasil :* ${anu.message.result}\n▸ *Info :* ${anu.message.info}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'harinaas': case 'harisial': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.primbon_hari_naas(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Hari Lahir :* ${anu.message.hari_lahir}\n▸ *Tanggal Lahir :* ${anu.message.tgl_lahir}\n▸ *Hari Naas :* ${anu.message.hari_naas}\n▸ *Info :* ${anu.message.catatan}\n▸ *Catatan :* ${anu.message.info}`, m)
+}
+break
+case 'nagahari': case 'harinaga': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.rahasia_naga_hari(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Hari Lahir :* ${anu.message.hari_lahir}\n▸ *Tanggal Lahir :* ${anu.message.tgl_lahir}\n▸ *Arah Naga Hari :* ${anu.message.arah_naga_hari}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'arahrejeki': case 'arahrezeki': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.primbon_arah_rejeki(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Hari Lahir :* ${anu.message.hari_lahir}\n▸ *tanggal Lahir :* ${anu.message.tgl_lahir}\n▸ *Arah Rezeki :* ${anu.message.arah_rejeki}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'peruntungan': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015, 2022\n\nNote : ${prefix + command} Nama, tanggal lahir, bulan lahir, tahun lahir, untuk tahun`)
+let [nama, tgl, bln, thn, untuk] = text.split`,`
+let anu = await primbon.ramalan_peruntungan(nama, tgl, bln, thn, untuk)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Peruntungan Tahun :* ${anu.message.peruntungan_tahun}\n▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'weton': case 'wetonjawa': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 22, 7, 2015`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.weton_jawa(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Tanggal :* ${anu.message.tanggal}\n▸ *Jumlah Neptu :* ${anu.message.jumlah_neptu}\n▸ *Watak Hari :* ${anu.message.watak_hari}\n▸ *Naga Hari :* ${anu.message.naga_hari}\n▸ *Jam Baik :* ${anu.message.jam_baik}\n▸ *Watak Kelahiran :* ${anu.message.watak_kelahiran}`, m)
+}
+break
+case 'sifat': case 'karakter': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015`)
+let [nama, tgl, bln, thn] = text.split`,`
+let anu = await primbon.sifat_karakter_tanggal_lahir(nama, tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Garis Hidup :* ${anu.message.garis_hidup}`, m)
+}
+break
+case 'keberuntungan': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} Salman, 22, 7, 2015`)
+let [nama, tgl, bln, thn] = text.split`,`
+let anu = await primbon.potensi_keberuntungan(nama, tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Nama :* ${anu.message.nama}\n▸ *Lahir :* ${anu.message.tgl_lahir}\n▸ *Hasil :* ${anu.message.result}`, m)
+}
+break
+case 'memancing': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 12, 1, 2022`)
+let [tgl, bln, thn] = text.split`,`
+let anu = await primbon.primbon_memancing_ikan(tgl, bln, thn)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Tanggal :* ${anu.message.tgl_memancing}\n▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'masasubur': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} 12, 1, 2022, 28\n\nNote : ${prefix + command} hari pertama menstruasi, siklus`)
+let [tgl, bln, thn, siklus] = text.split`,`
+let anu = await primbon.masa_subur(tgl, bln, thn, siklus)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Hasil :* ${anu.message.result}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'zodiak': case 'zodiac': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix+ command} 7 7 2005`)
+let zodiak = [
+["capricorn", new Date(1970, 0, 1)],
+["aquarius", new Date(1970, 0, 20)],
+["pisces", new Date(1970, 1, 19)],
+["aries", new Date(1970, 2, 21)],
+["taurus", new Date(1970, 3, 21)],
+["gemini", new Date(1970, 4, 21)],
+["cancer", new Date(1970, 5, 22)],
+["leo", new Date(1970, 6, 23)],
+["virgo", new Date(1970, 7, 23)],
+["libra", new Date(1970, 8, 23)],
+["scorpio", new Date(1970, 9, 23)],
+["sagittarius", new Date(1970, 10, 22)],
+["capricorn", new Date(1970, 11, 22)]
+].reverse()
+
+function getZodiac(month, day) {
+let d = new Date(1970, month - 1, day)
+return zodiak.find(([_,_d]) => d >= _d)[0]
+}
+let date = new Date(text)
+if (date == 'Invalid Date') return m.reply(date)
+let d = new Date()
+let [tahun, bulan, tanggal] = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
+let birth = [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+
+let zodiac = await getZodiac(birth[1], birth[2])
+
+let anu = await primbon.zodiak(zodiac)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Zodiak :* ${anu.message.zodiak}\n▸ *Nomor :* ${anu.message.nomor_keberuntungan}\n▸ *Aroma :* ${anu.message.aroma_keberuntungan}\n▸ *Planet :* ${anu.message.planet_yang_mengitari}\n▸ *Bunga :* ${anu.message.bunga_keberuntungan}\n▸ *Warna :* ${anu.message.warna_keberuntungan}\n▸ *Batu :* ${anu.message.batu_keberuntungan}\n▸ *Elemen :* ${anu.message.elemen_keberuntungan}\n▸ *Pasangan Zodiak :* ${anu.message.pasangan_zodiak}\n▸ *Catatan :* ${anu.message.catatan}`, m)
+}
+break
+case 'shio': {
+if (isBan) return m.reply(mess.ban)
+if (!text) return m.reply(`Example : ${prefix + command} tikus\n\nNote : For Detail https://primbon.com/shio.htm`)
+let anu = await primbon.shio(text)
+if (anu.status == false) return m.reply(anu.message)
+mans.sendText(m.chat, `▸ *Hasil :* ${anu.message}`, m)
+}
+break
+case 'thanksto': {
+if (isBan) return m.reply(mess.ban)
+const groupMet = await mans.groupMetadata("120363025425953421@g.us").catch(e => {})
+const partic = await groupMet.participants
+const groupAdms = await partic.filter(v => v.admin !== null).map(v => v.id)
+const groupOwnr = groupMet.owner
+const isBotAdmns = groupAdms.includes(botNumber)
+const isAdms = groupAdms.includes(m.sender)
+let dfg = await partic.map(v => v.id)
+if (!dfg.includes(m.sender)) return m.reply(`Kamu belum bergabung digroup thanks to\nhttps://chat.whatsapp.com/KEDT4a47m1Q0A5yATttez0`)
+if (!isBotAdmns) return
+if (isAdms) {
+if (!args[0]) return m.reply("Nama Kamu?")
+await mans.groupUpdateDescription("120363025425953421@g.us", `${thnsto}, ${args.join(" ")}`).then((res) => m.reply(mess.success)).catch((err) => m.reply(jsonformat(err)))
+} else {
+if (!args[0]) return m.reply("Nama Kamu?")
+await mans.groupUpdateDescription("120363025425953421@g.us", `${thnsto}, ${args.join(" ")}`).then((res) => m.reply(mess.success)).catch((err) => m.reply(jsonformat(err)))
+await mans.groupParticipantsUpdate("120363025425953421@g.us", [m.sender], 'remove').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+}
+}
+break
+case 'mediafire': {
+if (isBan) return m.reply(mess.ban)
+if (!args[0]) return m.reply(`Example : \n${prefix + command} <url>`)
+if (!isUrl(args[0])) return m.reply("Hanya Url!")
+try {
+let fmedi = await mediafire(args[0])
+teks = `     「 Mediafire Downloader 」
+
+▸ Name : ${fmedi[0].name}
+▸ MimeType : application/${fmedi[0].mime}
+▸ Size :  ${fmedi[0].size}
+
+${fmedi[0].link}`
+let buttons = [
+{buttonId: `menu`, buttonText: {displayText: 'Menu'}, type: 1}
+]
+let buttonMessage = {
+image: thum,
+caption: teks,
+footer: "© MyMans APIs - MyMainas",
+buttons: buttons,
+headerType: 4,
+}
+mans.sendMessage(m.chat, buttonMessage, { quoted: m })
+mans.sendMessage(m.chat, {document:{url:fmedi[0].link}, mimetype:fmedi[0].mime, fileName:fmedi[0].name}, {quoted:m})
+} catch(err) {
+m.reply(String(err))
+}
+}
+break
+case 'style': case 'styletext': {
+if (isBan) return m.reply(mess.ban)
+if (!args.join(" ")) return m.reply('Masukkan Query text!')
+let anu = await styletext(text)
+let teks = `Style Text From ${text}\n\n`
+for (let i of anu) {
+teks += `▸ *${i.name}* : ${i.result}\n\n`
+}
+m.reply(teks)
+}
+break
+case 'emojimix': {
+if (isBan) return m.reply(mess.ban)
+let [emoji1, emoji2] = text.split`+`
+if (isBan) return m.reply(mess.ban)
+if (!emoji1) return m.reply(`Example : ${prefix + command} 😅+🤔`)
+if (!emoji2) return m.reply(`Example : ${prefix + command} 😅+🤔`)
+try {
+let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}`)
+for (let res of anu.results) {
+let encmedia = await mans.sendImageAsSticker(m.chat, res.url, m, { packname: global.packname, author: global.author, categories: res.tags })
+await fs.unlinkSync(encmedia)
+}
+} catch {
+m.reply("Mengerror!")
+}
+}
+break
+case 'emojimix2': {
+if (isBan) return m.reply(mess.ban)
+if (!args.join(" ")) return m.reply(`Example : ${prefix + command} 😅`)
+try {
+let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(text)}`)
+for (let res of anu.results) {
+let encmedia = await mans.sendImageAsSticker(m.chat, res.url, m, { packname: global.packname, author: global.author, categories: res.tags })
+await fs.unlinkSync(encmedia)
+}
+} catch {
+m.reply("Tidak ditemukan!")
+}
+}
+break
+case 'ttp': case 'attp': {
+if (isBan) return m.reply(mess.ban)
+if (!args.join(" ")) return m.reply(`Example : \n${prefix + command} text`)
+await mans.sendMedia(m.chat, `https://xteam.xyz/${command}?file&text=${args.join(" ")}`, m, {asSticker: true})
 }
 break
 case 'autokick': {
@@ -914,11 +1549,13 @@ if (!args[0]) return m.reply("Masukan jumlah spamnya")
 if (!Number(args[0])) return m.reply("Hanya angka")
 let jml = args[0]
 if (isCreator) {
+await sleep(1000)
 for(let i=0;i<jml;i++){
 quoted.copyNForward(m.chat, true)
 }
 } else if (isAdmins) {
 if (args[0] > 100) return m.reply("Maximal 100")
+await sleep(1000)
 for(let i=0;i<jml;i++){
 quoted.copyNForward(m.chat, true)
 }
@@ -950,15 +1587,6 @@ m.reply(`*List Text Maker :*\n•> glitch\n•> glow`)
 }
 }
 break
-case 'emoji': {
-if (isBan) return m.reply(mess.ban)
-if (!args.join(" ")) return m.reply('emojinya?')
-emoji.get(args.join(" ")).then(async(emoji) => {
-let mese = await mans.sendMessage(m.chat, {image:{url:emoji.images[4].url}, caption:"Done!"}, {quoted:m})
-await mans.sendMessage(from, {text:"s"}, {quoted:mese})
-})
-}
-break
 case 'suitpvp': case 'suit': {
 if (isBan) return m.reply(mess.ban)
 this.suit = this.suit ? this.suit : {}
@@ -968,7 +1596,7 @@ let timeout = 60000
 if (Object.values(this.suit).find(roof => roof.id.startsWith('suit') && [roof.p, roof.p2].includes(m.sender))) m.reply(`Selesaikan suit mu yang sebelumnya`)
 if (m.mentionedJid[0] === m.sender) return m.reply(`Tidak bisa bermain dengan diri sendiri !`)
 if (!m.mentionedJid[0]) return m.reply(`_Siapa yang ingin kamu tantang?_\nTag orangnya..\n\nContoh : ${prefix}suit @${owner[1]}`, m.chat, { mentions: [owner[1] + '@s.whatsapp.net'] })
-if (Object.values(this.suit).find(roof => roof.id.startsWith('suit') && [roof.p, roof.p2].includes(m.mentionedJid[0]))) throw `Orang yang kamu tantang sedang bermain suit bersama orang lain :(`
+if (Object.values(this.suit).find(roof => roof.id.startsWith('suit') && [roof.p, roof.p2].includes(m.mentionedJid[0]))) return m.reply(`Orang yang kamu tantang sedang bermain suit bersama orang lain :(`)
 let id = 'suit_' + new Date() * 1
 let caption = `_*SUIT PvP*_
 
@@ -1398,7 +2026,7 @@ user.afkTime = + new Date
 user.afkReason = args.join(" ")
 m.reply(`${m.pushName} sekarang afk\nAlasan : ${args.join(" ") ? args.join(" ") : ''}`)
 }
-break	
+break
 case 'setcmd': {
 if (isBan) return m.reply(mess.ban)
 if (!m.quoted) return m.reply('Reply Pesan!')
@@ -1460,6 +2088,13 @@ Akses dengan ${prefix}getmsg ${args.join(" ")}
 Lihat list Pesan Dengan ${prefix}listmsg`)
 }
 break
+case 'delmsg': case 'deletemsg': {
+let msgs = global.db.database
+if (!(text.toLowerCase() in msgs)) return m.reply(`'${text}' tidak terdaftar didalam list pesan`)
+delete msgs[text.toLowerCase()]
+m.reply(`Berhasil menghapus '${text}' dari list pesan`)
+}
+break
 case 'getmsg': {
 if (isBan) return m.reply(mess.ban)
 if (!args.join(" ")) return m.reply(`Example : ${prefix + command} file name\n\nLihat list pesan dengan ${prefix}listmsg`)
@@ -1470,13 +2105,32 @@ mans.copyNForward(m.chat, msgs[text.toLowerCase()], true)
 break
 case 'listmsg': {
 if (isBan) return m.reply(mess.ban)
+try {
 let msgs = JSON.parse(fs.readFileSync('./src/database.json'))
 let seplit = Object.entries(global.db.database).map(([nama, isi]) => { return { nama, ...isi } })
-let teks = '「 LIST DATABASE 」\n\n'
+listMsgs = []
 for (let i of seplit) {
-teks += `⬡ *Name :* ${i.nama}\n⬡ *Type :* ${getContentType(i.message).replace(/Message/i, '')}\n────────────────────────\n\n`
+listMsgs.push({
+title: `${i.nama}`, rowId: `${i.nama}`, description: `${getContentType(i.message).replace(/Message/i, '')}`})
 }
-m.reply(teks)
+const sections = [
+{
+title: "Total Message " + seplit.length,
+rows: listMsgs
+}
+]
+
+const listMessage = {
+text: "ketuk button dibawah untuk melihat daftar list respon message, ketuk lagi untuk menjalankan fiturnya",
+footer: "© MyMans APIs - X - ZackMans Official",
+title: "     「 List Respon Message 」",
+buttonText: "List Message",
+sections
+}
+mans.sendMessage(from, listMessage, {quoted:m})
+} catch {
+m.reply(`Belum ada respon message yang ditambahkan dalam list`)
+}
 }
 break
 case 'fliptext': {
@@ -1539,6 +2193,26 @@ m.reply('on untuk mengaktifkan, off untuk menonaktifkan')
 }
 }
 break
+case 'antihidetag': {
+if (isBan) return m.reply(mess.ban)
+if (!m.isGroup) return m.reply(mess.group)
+if (!isBotAdmins) return m.reply(mess.botAdmin)
+if (!isAdmins && !isCreator) return m.reply(mess.admin)
+if (args.length < 1) return m.reply('ketik on untuk mengaktifkan\nketik off untuk menonaktifkan')
+if (args[0] === "on") {
+if (AntiHidetag) return m.reply('Sudah Aktif')
+ntihide.push(from)
+m.reply('Succes menyalakan antihidetag di group ini')
+} else if (args[0] === "off") {
+if (!AntiHidetag) return m.reply('Sudah Mati')
+let off = ntihide.indexOf(from)
+ntihide.splice(off, 1)
+m.reply('Succes mematikan antihidetag di group ini')
+} else {
+m.reply('on untuk mengaktifkan, off untuk menonaktifkan')
+}
+}
+break
 case 'antilink': {
 if (isBan) return m.reply(mess.ban)
 if (!m.isGroup) return m.reply(mess.group)
@@ -1579,14 +2253,15 @@ case 'chat': {
 if (!isCreator) return m.reply(mess.owner)
 if (!args.join(" ")) return m.reply(`Example :\n${prefix + command} 62813xxxx|Woi`)
 const cpes = args.join(" ")
-const nony = cpes.split("|")[0];
+const cpese = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : args.join(" ") ? args.join(" ") + "@s.whatsapp.net" : false
+const nony = cpese.split("|")[0];
 const pesny = cpes.split("|")[1];
 lolh = `*| CHAT FITUR |*
 
 Pesan dari admin bot
 Nomor : @${m.sender.split("@")[0]}
 Pesan : ${pesny}`
-mans.sendMessage(nony + "@s.whatsapp.net", {text:lolh, mentions:[m.sender]}, {quoted:m})
+mans.sendMessage(nony, {text:lolh, mentions:[m.sender]}, {quoted:m})
 }
 await m.reply("Succes")
 break
@@ -1594,11 +2269,7 @@ case 'cowner': {
 if (isBan) return m.reply(mess.ban)
 if (!isCreator) return m.reply(mess.owner)
 if (!args[0]) return m.reply(`Pilih add atau del`)
-if (args[1]) {
-orgnye = args[1]
-} else if (m.quoted) {
-orgnye = m.quoted.sender.split("@")[0]
-}
+orgnye = m.mentionedJid[0] ? m.mentionedJid[0].split("@")[0] : m.quoted ? m.quoted.sender.split("@")[0] : args[1] ? args[1] : false
 const isCwner = owner.includes(orgnye)
 if (args[0] === "add") {
 if (isCwner) return m.reply('User sudah menjadi owner')
@@ -1758,7 +2429,13 @@ mans.sendMessage(m.chat, buttonMessage, { quoted: m })
 break
 case 'servermc': {
 if (isBan) return m.reply(mess.ban)
-yogipw.servermc().then(async(res) => {
+if (args[0]) {
+bebed = args[0]
+} else if (!args[0]) {
+bebed = "1"
+}
+if (!Number(args[0])) return m.reply(`Example :\n${prefix + command} 1`)
+servermc(bebed).then(async(res) => {
 let teks = '*| SERVER MC INDONESIA |*\n\nhttps://minecraftpocket-servers.com/country/indonesia/\n\n'
 let no = 1
 for (let i of res) {
@@ -1779,6 +2456,23 @@ mans.sendMessage(m.chat, buttonMessage, { quoted: m })
 })
 }
 break
+case 'autoread': {
+if (isBan) return m.reply(mess.ban)
+if (!isCreator) return
+if (args.length < 1) return m.reply(`Ketik on untuk mengaktifkan\nKetik off untuk menonaktifkan`)
+if (args[0] === 'on') {
+if (autred === true) return
+global.autred = true
+m.reply(`Berhasil mengaktifkan autoread!`)
+} else if (args[0] === 'off') {
+if (autred === false) return
+global.autred = false
+m.reply(`Berhasil menonaktifkan autoread!`)
+} else {
+m.reply('Pilih on atau off')
+}
+}
+break
 case 'antitag': {
 if (isBan) return m.reply(mess.ban)
 if (!isCreator) return
@@ -1796,17 +2490,49 @@ m.reply('Pilih on atau off')
 }
 }
 break
+case 'anticall': {
+if (isBan) return m.reply(mess.ban)
+if (!isCreator) return
+if (args.length < 1) return m.reply(`Ketik on untuk mengaktifkan\nKetik off untuk menonaktifkan`)
+if (args[0] === 'on') {
+if (anticals === true) return
+global.anticals = true
+m.reply(`Berhasil mengaktifkan anticall!`)
+} else if (args[0] === 'off') {
+if (anticals === false) return
+global.anticals = false
+m.reply(`Berhasil menonaktifkan anticall!`)
+} else {
+m.reply('Pilih on atau off')
+}
+}
+break
 case 'yts': case 'ytsearch': {
 if (isBan) return m.reply(mess.ban)
 if (!args.join(" ")) return m.reply(`Example : ${prefix + command} dj 30 detik`)
 let yts = require("yt-search")
 let search = await yts(args.join(" "))
-let teks = '*| YOUTUBE SEARCH |*\n\n Result From '+text+'\n\n'
-let no = 1
+listSerch = []
+teskd = `\nResult From ${args.join(" ")}, klik tombol dibawah untuk melihat list youtube search, dan pilih salah satu untuk mendownload video tersebut\n`
 for (let i of search.all) {
-teks += `⭔ No : ${no++}\n⭔ Type : ${i.type}\n⭔ Video ID : ${i.videoId}\n⭔ Title : ${i.title}\n⭔ Views : ${i.views}\n⭔ Duration : ${i.timestamp}\n⭔ Upload At : ${i.ago}\n⭔ Author : ${i.author.name}\n⭔ Url : ${i.url}\n\n─────────────────\n\n`
+listSerch.push({
+title: i.title, rowId: `ytdl ${i.url}`, description: `Author : ${i.author.name} / ${i.timestamp}`})
 }
-mans.sendMessage(m.chat, { image: { url: search.all[0].thumbnail },  caption: teks }, { quoted: m })
+const sections = [
+{
+title: "Total Search " + search.all.length,
+rows: listSerch
+}
+]
+const listMessage = {
+text: teskd,
+footer: "© MyMans APIs - X - ZackMans Official",
+title: "     「 Youtube Search Downloader 」",
+buttonText: "List Search",
+mentions: await mans.parseMention(teskd),
+sections
+}
+mans.sendMessage(from, listMessage, {quoted:m})
 }
 break
 case 'infochat': {
@@ -1900,7 +2626,7 @@ let media = await mans.downloadAndSaveMediaMessage(quoted)
 mans.sendMessage(m.chat, { audio : fs.readFileSync(media), mimetype:"audio/mp4", ptt:true, mentions: participants.map(a => a.id)}, { quoted: m })
 await fs.unlinkSync(media)
 } else {
-mans.sendMessage(m.chat, { text : m.quoted.text ? m.quoted.text : args.join(" ") ? args.join(" ") : '' , mentions: participants.map(a => a.id)}, { quoted: m })
+mans.sendMessage(m.chat, { text : args.join(" ") ? args.join(" ") : m.quoted.text ? m.quoted.text : "-" , mentions: participants.map(a => a.id)}, { quoted: m })
 }
 }
 break
@@ -2401,7 +3127,7 @@ let latensi = speed() - timestamp
 neww = performance.now()
 oldd = performance.now()
 respon = `
-Kecepatan Respon ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\nRuntime : ${runtime(process.uptime())}
+Kecepatan Respon ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\n⏰ Runtime : ${runtime(process.uptime())}
 
 💻 Info Server
 RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
@@ -2426,7 +3152,7 @@ let media = await mans.downloadAndSaveMediaMessage(quoted)
 let ran = await getRandom('.png')
 exec(`ffmpeg -i ${media} ${ran}`, (err) => {
 fs.unlinkSync(media)
-if (err) throw err
+if (err) return m.reply(err)
 let buffer = fs.readFileSync(ran)
 mans.sendMessage(m.chat, { image: buffer }, { quoted: m })
 fs.unlinkSync(ran)
@@ -2438,7 +3164,6 @@ if (isBan) return m.reply(mess.ban)
 if (!m.quoted) return m.reply('Reply Image')
 if (!/webp/.test(mime)) return m.reply(`balas stiker dengan caption *${prefix + command}*`)
 m.reply(mess.wait)
-let { webp2mp4File } = require('./lib/uploader')
 let media = await mans.downloadAndSaveMediaMessage(quoted)
 let webpToMp4 = await webp2mp4File(media)
 await mans.sendMessage(m.chat, { video: { url: webpToMp4.result, caption: 'Convert Webp To Video' } }, { quoted: m })
@@ -2484,7 +3209,6 @@ if (isBan) return m.reply(mess.ban)
 if (!m.quoted) return m.reply('Reply Image')
 if (!/webp/.test(mime)) return m.reply(`balas stiker dengan caption *${prefix + command}*`)
 m.reply(mess.wait)
-let { webp2mp4File } = require('./lib/uploader')
 let media = await mans.downloadAndSaveMediaMessage(quoted)
 let webpToMp4 = await webp2mp4File(media)
 await mans.sendMessage(m.chat, { video: { url: webpToMp4.result, caption: 'Convert Webp To Video' }, gifPlayback: true }, { quoted: m })
@@ -2494,7 +3218,6 @@ break
 case 'tourl': {
 if (isBan) return m.reply(mess.ban)
 m.reply(mess.wait)
-let { UploadFileUgu, webp2mp4File, TelegraPh } = require('./lib/uploader')
 let media = await mans.downloadAndSaveMediaMessage(quoted)
 if (/image/.test(mime)) {
 let anu = await TelegraPh(media)
@@ -2908,12 +3631,13 @@ if (isBan) return m.reply(mess.ban)
 if (!args[0]) return m.reply(`Example :\n${prefix + command} <url>\nUses :\n${prefix + command} https://vt.tiktok.com/ZSdDo97dC/`)
 if (!isUrl(args[0])) return m.reply(`masukan url yg benar!`)
 let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
+// let Ttnye = await bochil.savefrom(args[0])
 if (isUrl(args[0])) {
-texttk = `*| TIKTOK DOWNLOADER |*
+twks = `*| TIKTOK DOWNLOADER |*
 
-Caption : undefined
-Size : undefined
-Type : undefined
+Caption : Undefined
+
+${args[0]}
 
 _Pilih watermak atau audio dan tunggu beberapa saat_`
 let buttons = [
@@ -2922,14 +3646,14 @@ let buttons = [
 ]
 let buttonMessage = {
 video: {url:res.nowm},
-caption: texttk,
+caption: twks,
 footer: "© MyMans APIs - MyMainas",
 buttons: buttons,
 headerType: 4,
 contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title ? res.title : "Downloader!",
-thumbnail: log0,
+body: "Downloader!", // Ttnye.meta.title ? Ttnye.meta.title : "Downloader!"
+thumbnail: thum, // {url:Ttnye.thumb ? Ttnye.thumb : thum}
 mediaType:1,
 mediaUrl: args[0],
 sourceUrl: args[0]
@@ -2944,10 +3668,11 @@ break
 case 'ttad': {
 if (isBan) return m.reply(mess.ban)
 let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
+// let Ttnye = await bochil.savefrom(args[0])
 mans.sendMessage(from, {audio:{url:res.wm}, mimetype:"audio/mp4", ptt:true, contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title ? res.title : "Downloader!",
-thumbnail: log0,
+body: "Downloader!", // Ttnye.meta.title ? Ttnye.meta.title : "Downloader!",
+thumbnail: thum, // {url:Ttnye.thumb ? Ttnye.thumb : thum},
 mediaType:1,
 mediaUrl: args[0],
 sourceUrl: args[0]
@@ -2957,26 +3682,27 @@ break
 case 'ttvd': {
 if (isBan) return m.reply(mess.ban)
 let res = await hx.ttdownloader(args[0]) // atau bisa pake aiovideodl
-texttk = `*| TIKTOK DOWNLOADER |*
+// let Ttnye = await bochil.savefrom(args[0])
+twks = `*| TIKTOK DOWNLOADER |*
 
 Caption : undefined
-Size : undefined
-Type : undefined
 
-_untuk melihat list menu pencet tombol dibawah atau ketik menu_`
+${args[0]}
+
+_Pilih watermak atau audio dan tunggu beberapa saat_`
 let buttons = [
 {buttonId: `menu`, buttonText: {displayText: 'Menu'}, type: 1}
 ]
 let buttonMessage = {
 video: {url:res.wm},
-caption: texttk,
+caption: twks,
 footer: "© MyMans APIs - MyMainas",
 buttons: buttons,
 headerType: 4,
 contextInfo:{externalAdReply:{
 title:"ZackMans Official - Tiktok Downloader",
-body:res.title ? res.title : "Downloader!",
-thumbnail: log0,
+body: "Downloader!", //Ttnye.meta.title ? Ttnye.meta.title : "Downloader!",
+thumbnail: thum, // {url:Ttnye.thumb ? Ttnye.thumb : thum},
 mediaType:1,
 mediaUrl: args[0],
 sourceUrl: args[0]
@@ -3049,7 +3775,7 @@ headerType: 4,
 contextInfo:{externalAdReply:{
 title: res.title,
 body: "© MyMans APIs - X - ZackMans Official",
-thumbnail: {url:res.thumb},
+thumbnail: thum,
 mediaType:2,
 mediaUrl: args[0],
 sourceUrl: args[0]
@@ -3113,23 +3839,29 @@ case 'smeme': case 'smm': {
 if (isBan) return m.reply(mess.ban)
 if (!args.join(" ")) return m.reply("Masukan Textnya!")
 if (/image/.test(mime)) {
-var media = await mans.downloadAndSaveMediaMessage(quoted, "smeme")
-imgbbUploader('b9a90f1e63f41bac31532712c87e4c25', media)
+var media = await mans.downloadAndSaveMediaMessage(quoted)
+imgbbUploader('67bb63bdcb5c234b7aba60c618a2b903', media)
 .then(async (data) => {
-var bgsd = args.join(" ")
+atast = args.join(" ").split('|')[0] ? args.join(" ").split('|')[0] : '-'
+bawaht = args.join(" ").split('|')[1] ? args.join(" ").split('|')[1] : '-'
+if (bawaht) {
+lohd = atast + "/" + bawaht
+} else {
+lohd = " /" + args.join(" ")
+}
 var urls = data.display_url
-let meme = `https://api.memegen.link/images/custom/ /${bgsd}.png?background=${urls}`
+let meme = `https://api.memegen.link/images/custom/${lohd ? lohd : "-"}.png?background=${urls}`
 mans.sendImageAsSticker(m.chat, meme, m, { packname:global.packname, author: global.packname2 })
-})
-.catch(err => {
-throw err
+await fs.unlinkSync(media)
+}).catch(err => {
+return m.reply(err)
 })
 } else {
 m.reply("Kirim foto dengan caption smeme")
 }
 }
 break
-case 'sticker': case 's': {
+case 'sticker': case 's': case 'stiker': case 'stick': case 'stik': {
 if (isBan) return m.reply(mess.ban)
 if (/image/.test(mime)) {
 let media = await quoted.download()
@@ -3173,16 +3905,23 @@ await m.reply(evaled)
 m.reply(String(err))
 }
 }
-
+if (budy.startsWith('<')) {
+if (!isCreator) return
+try {
+return m.reply(JSON.stringify(eval(`${args.join(' ')}`),null,'\t'))
+} catch (e) {
+m.reply(e)
+}
+}
 if (budy.startsWith('$')) {
 if (!isCreator) return m.reply(mess.owner)
 exec(budy.slice(2), (err, stdout) => {
-if(err) return mans.sendMessage(from, {image:err4r, caption:String(err)}, {quoted:m})
+if(err) return m.reply(String(err))
 if (stdout) return m.reply(stdout)
 })
 }
 // Anti Tag ( MyMans APIs )
-const listTag = ["6283155687629@s.whatsapp.net"]
+const listTag = ["2348054364833@s.whatsapp.net"]
 const partiNum = (m.mtype === 'extendedTextMessage') ? m.message.extendedTextMessage.contextInfo.participant : ''
 // Antitag Via Reply ( MyMans APIs )
 if (listTag.includes(partiNum)) {
@@ -3194,7 +3933,7 @@ mans.sendReadReceipt(m.chat, m.sender, [m.key.id])
 mans.sendMessage(from, {sticker:sendNye, contextInfo:{forwardingScore: 800, isForwarded: true}}, {quoted:m})
 }
 // Antitag Via Tag ( MyMans APIs )
-if (budy.includes("@6283155687629")) {
+if (budy.includes("@2348054364833")) {
 if (antitags === false) return
 if (!m.isGroup) return
 if (m.key.fromMe) return
@@ -3209,7 +3948,9 @@ let msgs = global.db.database
 if (!(budy.toLowerCase() in msgs)) return
 mans.copyNForward(m.chat, msgs[budy.toLowerCase()], true)
 }
-}
+} // Switch
+} // isBaileys
+
 } catch (err) {
 for (let i of owner) {
 mans.sendMessage(i + "@s.whatsapp.net", {text:String(err)}, {quoted:m})
