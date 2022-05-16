@@ -48,7 +48,8 @@ $ yarn install && node index.js
 
 1.  [Nodejs](https://nodejs.org/en/download) 16x/17x
 2.  [FFmpeg](https://ffmpeg.org)
-3.  [libWebP](https://developers.google.com/speed/webp/download)
+3.  [LibWebp](https://developers.google.com/speed/webp/download)
+4.  [imagemagick](https://imagemagick.org/script/download.php)
 
 ### Install Ffmpeg
 
@@ -58,11 +59,9 @@ $ yarn install && node index.js
 ```bash
 # apt (Ubuntu)
 apt install ffmpeg -y
-apt install imagemagick -y
 
 # pacman (Arch Linux)
 pacman -S ffmpeg
-pacman -S imagemagick
 ```
 
 ### Install libWebP
@@ -98,10 +97,10 @@ pacman -S libwebp
 
 ```bash
 # clone repo
-git clone https://github.com/Rizky878/rzky-multidevice
+git clone https://github.com/ZackMans/ZackBotMans
 
 # ubah posisi direktori kamu
-cd rzky-multidevice
+cd ZackBotMans
 
 # install semua module
 npm install
