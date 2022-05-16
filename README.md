@@ -143,6 +143,7 @@ npm start
 -   [`DikaArdnt`](https://github.com/DikaArdnt)
 -   [`RzkyFdlh`](https://github.com/Rizky878)
 -   [`Zawhazein`](https://github.com/zhwzein)
+-   [`YogiPw`](https://github.com/yogipw)
 -   [`ZackMans`](https://github.com/ZackMans)
 
 ```Thanks to all who have participated in the development of this script```
