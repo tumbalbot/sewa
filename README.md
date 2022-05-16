@@ -51,7 +51,7 @@ $ yarn install && node index.js
 3.  [LibWebp](https://developers.google.com/speed/webp/download)
 4.  [imagemagick](https://imagemagick.org/script/download.php)
 
-### Install Ffmpeg
+### Install FFmpeg
 
 -   Untuk pengguna Windows, kamu bisa lihat tutorial disini [WikiHow](https://www.wikihow.com/Install-Ffmpeg-on-Windows)<br />
 -   Untuk pengguna Linux, kamu bisa pakai manager paket kamu sendiri. Contohnya;
@@ -64,7 +64,7 @@ apt install ffmpeg -y
 pacman -S ffmpeg
 ```
 
-### Install libWebP
+### Install LibWebp
 
 -   Untuk pengguna Windows,
 
@@ -91,6 +91,19 @@ apt install libwebp-dev -y
 
 # pacman (Arch Linux)
 pacman -S libwebp
+```
+
+### Install imagemagick
+
+-   Untuk pengguna Windows, kamu bisa lihat tutorial disini [Ziixon93](https://ziixon93.blogspot.com/2020/07/cara-memasang-imagemagick-di-xampp.html?m=1)<br />
+-   Untuk pengguna Linux, kamu bisa pakai manager paket kamu sendiri. Contohnya;
+
+```bash
+# apt (Ubuntu)
+apt install imagemagick -y
+
+# pacman (Arch Linux)
+pacman -S imagemagick
 ```
 
 ### Clone Repo
